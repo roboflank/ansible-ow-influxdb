@@ -30,13 +30,23 @@
     state: latest
   tags: [influxdb]
 
-- name: Add influxdb repo
-  apt_repository:
-    repo: "deb https://repos.influxdata.com/{{ ansible_distribution.lower() }}/ {{ ansible_distribution_release  }} stable"
+- name: Add influxdb v1 key
+  apt_key:
+    url: https://repos.influxdata.com/influxdata-archive_compat.key
     state: present
-  when: (ansible_distribution|string == 'Ubuntu' and (ansible_distribution_release|string == 'focal' or ansible_distribution_release|string == 'bionic')) or 
-        ansible_distribution|string == 'Debian'
   tags: [influxdb]
+  
+- name: Add influx v1 repo
+  shell: echo '393e8779c89ac8d958f81f942f9ad7fb82a25e133faddaf92e15b16e6ac9ce4c influxdata-archive_compat.key' | sha256sum -c && cat influxdata-archive_compat.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg > /dev/null
+
+- name: Add influx v1 to list
+  shell: echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
+
+- name: Update and upgrade apt packages
+  become: true
+  apt:
+    update_cache: yes
+    upgrade: 'yes'
 
 - name: Install influxdb for ubuntu22 (jammy jellyfish)
   apt_repository:
