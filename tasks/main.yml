@@ -30,12 +30,6 @@
     state: latest
   tags: [influxdb]
 
-- name: Add influxdb key
-  apt_key:
-    url: https://repos.influxdata.com/influxdb.key
-    state: present
-  tags: [influxdb]
-
 - name: Add influxdb repo
   apt_repository:
     repo: "deb https://repos.influxdata.com/{{ ansible_distribution.lower() }}/ {{ ansible_distribution_release  }} stable"
